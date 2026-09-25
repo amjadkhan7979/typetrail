@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TypeTrail - free typing practice with guided lessons, finger guides, and speed and accuracy tracking.">
+<title>TypeTrail</title>
+<style>
+:root{
+  --bg:#e9f2fb;
+  --panel:#ffffff;
+  --panel-2:#f3f8fd;
+  --ink:#152238;
+  --ink-soft:#5c6b85;
+  --ink-faint:#8b96ab;
+  --accent:#2f6fed;
+  --accent-ink:#1c4fce;
+  --accent-soft:#dde9ff;
+  --border:#d9e4f2;
+  --gold:#f0ac16;
+  --gold-dim:#e3d3ad;
+  --green:#1fa863;
+  --red:#e0524a;
+  --shadow:0 1px 2px rgba(20,40,80,.06), 0 8px 24px -12px rgba(20,40,80,.18);
+  --f-lp:#ef7b73; --f-lr:#f2a24a; --f-lm:#f0cb4e; --f-li:#6fcf97;
+  --f-ri:#49c9c2; --f-rm:#5aa8f2; --f-rr:#9b8cf0; --f-rp:#df8fd6; --f-thumb:#aeb8ca;
+  --key-ink:#1b2430;
+  --font-display:'Baloo 2', ui-rounded, 'Segoe UI', sans-serif;
+  --font-body:'Source Sans 3', system-ui, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1526;
+    --panel:#141f36;
+    --panel-2:#101a2e;
+    --ink:#eaf1fb;
+    --ink-soft:#a4b3cc;
+    --ink-faint:#6c7994;
+    --accent:#5b8bff;
+    --accent-ink:#9db8ff;
+    --accent-soft:#1c2c4d;
+    --border:#233252;
+    --gold:#f0ac16;
+    --gold-dim:#4a4126;
+    --green:#3ec27c;
+    --red:#ef6b63;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    --key-ink:#141c2c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1526;
+  --panel:#141f36;
+  --panel-2:#101a2e;
+  --ink:#eaf1fb;
+  --ink-soft:#a4b3cc;
+  --ink-faint:#6c7994;
+  --accent:#5b8bff;
+  --accent-ink:#9db8ff;
+  --accent-soft:#1c2c4d;
+  --border:#233252;
+  --gold:#f0ac16;
+  --gold-dim:#4a4126;
+  --green:#3ec27c;
+  --red:#ef6b63;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  --key-ink:#141c2c;
+}
+*{box-sizing:border-box;}
+body{background:var(--bg); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased;}
+#app{max-width:1080px; margin:0 auto; padding-inline:20px; padding-block:20px 40px;}
+h1,h2,h3{font-family:var(--font-display); text-wrap:balance; margin:0;}
+button{font-family:inherit;}
+[hidden]{display:none!important;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ---------- Header / stats ---------- */
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px;}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{width:38px; height:38px; border-radius:11px; background:linear-gradient(150deg,var(--accent),var(--accent-ink)); display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display); font-weight:700; font-size:19px; box-shadow:var(--shadow); flex-shrink:0;}
+.brand-name{font-family:var(--font-display); font-weight:700; font-size:23px; letter-spacing:.2px;}
+.stats-row{display:flex; gap:10px; flex-wrap:wrap;}
+.stat-chip{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:8px 14px; display:flex; flex-direction:column; align-items:flex-start; min-width:92px; box-shadow:var(--shadow);}
+.stat-chip .val{font-family:var(--font-display); font-size:19px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1;}
+.stat-chip .lbl{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; margin-top:1px;}
+
+/* ---------- Tabs ---------- */
+.level-tabs{display:flex; gap:8px; margin:22px 0 18px; border-bottom:1px solid var(--border); padding-bottom:0;}
+.level-tab{background:none; border:none; padding:9px 4px; margin-right:14px; font-size:15.5px; font-weight:600; color:var(--ink-faint); cursor:pointer; border-bottom:3px solid transparent; transition:color .15s;}
+.level-tab.active{color:var(--accent-ink); border-bottom-color:var(--accent);}
+.level-tab:hover{color:var(--ink);}
+.level-tab:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+/* ---------- Continue card ---------- */
+.continue-card{display:flex; align-items:center; gap:18px; background:linear-gradient(120deg,var(--accent),var(--accent-ink)); color:#fff; border-radius:18px; padding:18px 22px; margin-bottom:26px; box-shadow:var(--shadow); cursor:pointer; border:none; text-align:left; width:100%;}
+.continue-card:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+.continue-icon{width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.continue-icon svg{width:24px; height:24px;}
+.continue-text{flex:1; min-width:0;}
+.continue-eyebrow{font-size:11.5px; text-transform:uppercase; letter-spacing:.8px; opacity:.85; font-weight:700;}
+.continue-title{font-family:var(--font-display); font-size:20px; font-weight:700; margin-top:2px;}
+.continue-sub{font-size:13px; opacity:.9; margin-top:2px;}
+.continue-arrow{font-size:22px; opacity:.85;}
+
+/* ---------- Sections / lesson grid ---------- */
+.section-block{margin-bottom:28px;}
+.section-title{font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-soft); margin-bottom:12px;}
+.lesson-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:12px;}
+.lesson-card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:left; cursor:pointer; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; transition:transform .12s, border-color .12s;}
+.lesson-card:hover{transform:translateY(-2px); border-color:var(--accent);}
+.lesson-card:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.lesson-num{font-size:11px; color:var(--ink-faint); font-weight:700;}
+.lesson-title{font-family:var(--font-display); font-weight:700; font-size:15.5px; line-height:1.25;}
+.lesson-keys{display:flex; gap:4px; flex-wrap:wrap;}
+.keycap-mini{background:var(--panel-2); border:1px solid var(--border); border-radius:5px; padding:2px 6px; font-family:var(--font-mono); font-size:11.5px; font-weight:600; color:var(--ink-soft);}
+.lesson-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:4px;}
+.stars-mini{display:flex; gap:1px;}
+.star{color:var(--gold-dim); font-size:14px;}
+.star.filled{color:var(--gold);}
+.wpm-mini{font-size:11.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+
+.reset-row{margin-top:12px; text-align:right;}
+.btn-ghost-danger{background:none; border:1px solid var(--border); color:var(--ink-faint); font-size:12.5px; padding:7px 13px; border-radius:9px; cursor:pointer;}
+.btn-ghost-danger:hover{color:var(--red); border-color:var(--red);}
+
+/* ---------- Buttons (general) ---------- */
+.btn{border:none; border-radius:11px; padding:11px 20px; font-weight:700; font-size:14.5px; cursor:pointer; font-family:var(--font-body);}
+.btn-primary{background:var(--accent); color:#fff; box-shadow:var(--shadow);}
+.btn-primary:hover{background:var(--accent-ink);}
+.btn-secondary{background:var(--panel); color:var(--ink); border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent); color:var(--accent-ink);}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+/* ---------- Typing screen ---------- */
+#screen-typing{position:relative;}
+.type-topbar{display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
+.icon-btn{background:var(--panel); border:1px solid var(--border); border-radius:10px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow); flex-shrink:0;}
+.icon-btn:hover{border-color:var(--accent);}
+.icon-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.type-title{font-family:var(--font-display); font-weight:700; font-size:17px; flex:1; min-width:120px;}
+.type-metrics{display:flex; gap:8px; flex-wrap:wrap;}
+.metric{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; text-align:center; min-width:64px; box-shadow:var(--shadow);}
+.metric .v{font-family:var(--font-display); font-size:16.5px; font-weight:700; font-variant-numeric:tabular-nums;}
+.metric .l{font-size:10px; text-transform:uppercase; letter-spacing:.4px; color:var(--ink-soft);}
+
+.text-panel{background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:26px 28px; box-shadow:var(--shadow); position:relative; margin-bottom:14px;}
+.text-scroll{height:calc(3 * 1.9em); overflow:hidden; position:relative;}
+.text-inner{font-family:var(--font-mono); font-size:22px; line-height:1.9em; white-space:normal; overflow-wrap:normal; word-break:keep-all; transition:transform .18s ease; color:var(--ink-faint); letter-spacing:.2px;}
+.text-inner .ch{position:relative; transition:color .05s;}
+.text-inner .ch.correct{color:var(--ink);}
+.text-inner .ch.wrong{color:var(--red); background:color-mix(in srgb, var(--red) 16%, transparent); border-radius:3px;}
+.text-inner .ch.wrong.shake{animation:shakec .28s;}
+.text-inner .ch.cursor{border-radius:3px;}
+.text-inner .ch.cursor::before{content:''; position:absolute; left:-1px; top:2px; bottom:1px; width:2px; background:var(--accent); animation:blink 1s step-end infinite;}
+.text-inner .ch.cursor.space-cur{background:var(--accent-soft); border-radius:3px;}
+@keyframes blink{50%{opacity:0;}}
+@keyframes shakec{0%,100%{transform:translateX(0);}20%{transform:translateX(-3px);}40%{transform:translateX(3px);}60%{transform:translateX(-2px);}80%{transform:translateX(2px);}}
+.ready-overlay{position:absolute; inset:0; background:color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; border-radius:18px; font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--ink-soft); text-align:center; padding:20px;}
+
+.progress-track{height:7px; background:var(--panel-2); border-radius:99px; overflow:hidden; border:1px solid var(--border); margin-bottom:18px;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-ink)); width:0%; transition:width .15s;}
+
+.hint-line{text-align:center; font-size:14.5px; color:var(--ink-soft); margin-bottom:12px; min-height:20px;}
+.hint-line b{color:var(--ink);}
+.kb-toggle-row{display:flex; justify-content:center; margin-bottom:8px;}
+.kb-toggle{background:none; border:none; color:var(--ink-faint); font-size:12.5px; cursor:pointer; text-decoration:underline; padding:4px;}
+
+/* ---------- Keyboard ---------- */
+.keyboard-wrap{background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:16px 14px 14px; box-shadow:var(--shadow);}
+.kb-row{display:flex; gap:5px; margin-bottom:5px; justify-content:center;}
+.key{background:var(--panel-2); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; flex:1 1 0; min-width:0; height:40px; font-family:var(--font-mono); font-size:13.5px; font-weight:600; color:var(--key-ink); position:relative; user-select:none; transition:transform .06s, box-shadow .12s; background-color:var(--tint, var(--panel-2));}
+.key.special{font-family:var(--font-body); font-size:11px; color:var(--ink-soft); background-color:var(--tint, var(--panel-2));}
+.key .bump{position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:12px; height:2.5px; border-radius:2px; background:rgba(0,0,0,.28);}
+.key.next-key{box-shadow:0 0 0 3px color-mix(in srgb, var(--tint) 70%, var(--ink) 30%), var(--shadow); transform:translateY(-2px); z-index:2;}
+.key.next-shift{box-shadow:0 0 0 3px var(--accent), var(--shadow); transform:translateY(-2px); z-index:2;}
+.key.pressed{transform:translateY(1px) scale(.96);}
+.key.wrong-flash{background-color:var(--red)!important; color:#fff;}
+.key-space{flex:0 0 46%; max-width:460px;}
+@media (max-width:640px){ .key-space{flex-basis:60%;} }
+
+.legend{display:flex; flex-wrap:wrap; gap:10px 16px; justify-content:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--border);}
+.legend-item{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft);}
+.legend-swatch{width:12px; height:12px; border-radius:4px; flex-shrink:0;}
+
+/* ---------- Results screen ---------- */
+.results-panel{max-width:460px; margin:30px auto 0; background:var(--panel); border:1px solid var(--border); border-radius:22px; padding:32px 28px; box-shadow:var(--shadow); text-align:center;}
+.results-stars{display:flex; justify-content:center; gap:6px; margin-bottom:14px;}
+.results-stars .star{font-size:40px;}
+.results-title{font-family:var(--font-display); font-weight:700; font-size:21px; margin-bottom:22px;}
+.results-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:22px;}
+.results-stat{background:var(--panel-2); border-radius:13px; padding:12px 8px;}
+.results-stat .v{font-family:var(--font-display); font-size:22px; font-weight:700; font-variant-numeric:tabular-nums;}
+.results-stat .l{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.4px; margin-top:2px;}
+.missed-row{margin-bottom:24px;}
+.missed-title{font-size:12.5px; color:var(--ink-soft); margin-bottom:8px;}
+.missed-keys{display:flex; justify-content:center; gap:8px;}
+.results-actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+
+@media (max-width:640px){
+  .text-inner{font-size:17px;}
+  .text-scroll{height:calc(3 * 1.9em);}
+  .brand-name{font-size:19px;}
+  .stat-chip{min-width:78px; padding:6px 10px;}
+  .results-panel{padding:26px 18px;}
+  .type-title{order:3; width:100%;}
+}
+.site-credit{text-align:center; margin-top:36px; font-size:13px; color:var(--ink-faint);}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap">
+
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= LESSONS SCREEN ================= -->
+  <section class="screen active" id="screen-lessons">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div class="brand-name">TypeTrail</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-chip"><span class="val" id="stat-completed">0</span><span class="lbl">Lessons done</span></div>
+        <div class="stat-chip"><span class="val" id="stat-wpm">0</span><span class="lbl">Best WPM</span></div>
+        <div class="stat-chip"><span class="val" id="stat-stars">0</span><span class="lbl">Stars earned</span></div>
+      </div>
+    </div>
+
+    <button class="continue-card" id="continue-card">
+      <div class="continue-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></div>
+      <div class="continue-text">
+        <div class="continue-eyebrow">Continue</div>
+        <div class="continue-title" id="continue-title">Loading…</div>
+        <div class="continue-sub" id="continue-sub"></div>
+      </div>
+      <div class="continue-arrow">→</div>
+    </button>
+
+    <div class="level-tabs" id="level-tabs"></div>
+    <div id="sections-host"></div>
+
+    <div class="reset-row"><button class="btn-ghost-danger" id="reset-btn">Reset progress</button></div>
+  </section>
+
+  <!-- ================= TYPING SCREEN ================= -->
+  <section class="screen" id="screen-typing">
+    <div class="type-topbar">
+      <button class="icon-btn" id="back-btn" aria-label="Back to lessons">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="type-title" id="type-title">Lesson</div>
+      <div class="type-metrics">
+        <div class="metric"><div class="v" id="live-wpm">0</div><div class="l">WPM</div></div>
+        <div class="metric"><div class="v" id="live-acc">100%</div><div class="l">Accuracy</div></div>
+        <div class="metric"><div class="v" id="live-time">0:00</div><div class="l">Time</div></div>
+      </div>
+    </div>
+
+    <div class="text-panel">
+      <div class="text-scroll"><div class="text-inner" id="text-inner"></div></div>
+      <div class="ready-overlay" id="ready-overlay">Start typing when ready</div>
+    </div>
+
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+    <div class="hint-line" id="hint-line">&nbsp;</div>
+    <div class="kb-toggle-row"><button class="kb-toggle" id="kb-toggle">Hide keyboard</button></div>
+
+    <div class="keyboard-wrap" id="keyboard-wrap">
+      <div id="kb-rows"></div>
+      <div class="legend" id="kb-legend"></div>
+    </div>
+
+    <input id="mobile-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:absolute; opacity:0; height:1px; width:1px; pointer-events:none; left:-9999px;">
+  </section>
+
+  <!-- ================= RESULTS SCREEN ================= -->
+  <section class="screen" id="screen-results">
+    <div class="results-panel">
+      <div class="results-stars" id="results-stars"></div>
+      <div class="results-title" id="results-title">Lesson complete!</div>
+      <div class="results-grid">
+        <div class="results-stat"><div class="v" id="res-wpm">0</div><div class="l">WPM</div></div>
+        <div class="results-stat"><div class="v" id="res-acc">0%</div><div class="l">Accuracy</div></div>
+        <div class="results-stat"><div class="v" id="res-time">0:00</div><div class="l">Time</div></div>
+      </div>
+      <div class="missed-row" id="missed-row">
+        <div class="missed-title">Keys to watch</div>
+        <div class="missed-keys" id="missed-keys"></div>
+      </div>
+      <div class="results-actions">
+        <button class="btn btn-secondary" id="btn-retry">Try again</button>
+        <button class="btn btn-primary" id="btn-next">Next lesson ↵</button>
+      </div>
+      <div style="margin-top:12px;"><button class="btn-ghost-danger" id="btn-alllessons">All lessons</button></div>
+    </div>
+  </section>
+
+  <footer class="site-credit">Created by Amjad Khan</footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   WORD BANKS
+   ============================================================ */
+var MASTER_WORDS = ("a an as at add ads all ask ash dad dash fall fad fads flag flags flash flask gag gala gash glad had hag half hall has hash lad lag salad sad ass gas add "+
+"age air and any arm art ate bad bag ban bar bat bed bee big bit box boy bug bus but buy can cap car cat cop cow cry cup cut day den dig dim dog dry ear eat egg end era eye "+
+"fan far fat few fig fit fix fly for fox fun fur gap gas get got gum gun guy gym hat him his hit hot how hug hut ice ill ink its jam jar jaw jet job jog joy jug key kid kit "+
+"lab lag lap law lay leg let lid lip lit log lot low mad man map mat may mix mob mom mud mug nap net new nod nor not now nut oak odd off oil old one our out owl own pad pan "+
+"pay pen pet pie pig pin pit pop pot pub put ran rat raw red rib rid rip rob rot row rub run sad sat saw say set sit six sky sly sob son sun tag tan tap tax tea ten the tie "+
+"tin tip toe top toy try tub tug use van vet via wag war was wax way web wet who why win wit yes yet zip zoo "+
+"about above after again ahead alone along always among angry apple arrow awake awful being below beside black blank bless blind block blood board boast bones bread break "+
+"bring brown build burst carry chair chalk chase cheap check chess chief child claim class clean clear climb close cloth cloud coach coast could count court cover craft crash "+
+"cross crowd dance dealt depth doubt draft drank dream dress drink drive early earth eight eject elect empty enjoy enter equal error event every exact exist extra faith false "+
+"fault fence field fifty fight final first flame flash fleet float flock flood floor flour focus force forth found frame fresh front frost fruit gains giant given glass globe "+
+"grace grade grain grand grant grass great green greet gross group grown guard guess guest guide happy harsh heart heavy hello hills honey horse hotel house human humor image "+
+"index inner input issue judge juice known label large later laugh learn least level light limit lived local lodge logic loose lucky lunch magic major maker match mayor meant "+
+"medal merge merit metal might minor minus mixed model month moral motor mount mouse mouth mover music needs never night noble noise north notes novel nurse occur ocean offer "+
+"often order other ought outer owner paint panel paper party peace phase phone photo piece pilot pitch place plain plane plant plate point pound power press price pride prime "+
+"print prior prize proof proud prove quiet quite radio raise range rapid ratio reach ready refer relax reply right rigid risky river round royal rural safer sails scale scene "+
+"scope score sense serve seven shade shake shall shape share sharp sheep sheet shelf shine shirt shock short shown sight silly since sixth sixty skill sleep slice slide small "+
+"smart smile smoke solid sorry sound south space spare speak speed spend spent spite split spoke sport spray squad stack staff stage stake stamp stand start state stay steam "+
+"steel steep stern stick still stock stone store storm story strip study stuff style sugar suits sunny super sweet swift swing table taste teach teeth their theme there thick "+
+"thing think third those three throw tight timer times tired title today topic total touch tough tower track trade train treat trend trial tribe trick tried truck truly trust "+
+"truth twice under union unity until upper upset urban usage usual valid value video visit vital voice waste watch water weigh weird wheel where which while white whole whose "+
+"woman world worry worse worth would wound write wrong yield young youth"
+).split(/\s+/).filter(Boolean);
+
+var TOP100 = ("the of and a to in is you that it he was for on are as with his they i at be this have from or one had by word but not what all were we when your can said "+
+"there use an each which she do how their if will up other about out many then them these so some her would make like him into time has look two more write go see number no way "+
+"could people my than first water been call who").split(/\s+/);
+
+var CONTRACTIONS = ["don't","can't","it's","i'm","we're","they're","isn't","won't","didn't","i've","you're","he's","she's","that's","wasn't","couldn't","wouldn't","let's","what's","there's"];
+
+var LONG_WORDS = MASTER_WORDS.filter(function(w){return w.length>=7;}).concat(
+  ["keyboard","exercise","practice","together","favorite","mountain","umbrella","calendar","building","sandwich","triangle","daylight","elephant","suitcase","backyard","notebook","seashore","whistle","laughter","distance","vacation","possible","rainfall","lighthouse","adventure","butterfly","chocolate","dinosaur","fireworks","harmonica","juniper","knapsack","landscape","marigold","navigator","orchestra","pineapple","questionable","raspberry","strawberry","telephone","umbrellas","volunteer","waterfall","xylophone","yesterday","zeppelin"]
+);
+
+/* ============================================================
+   TEXT GENERATION HELPERS
+   ============================================================ */
+function rnd(n){return Math.floor(Math.random()*n);}
+function choice(arr){return arr[rnd(arr.length)];}
+function shuffle(arr){var a=arr.slice(); for(var i=a.length-1;i>0;i--){var j=rnd(i+1); var t=a[i];a[i]=a[j];a[j]=t;} return a;}
+
+function weightedKey(newKeys,learnedKeys){
+  if(newKeys && newKeys.length && Math.random()<0.7) return choice(newKeys);
+  if(learnedKeys && learnedKeys.length) return choice(learnedKeys);
+  return newKeys && newKeys.length ? choice(newKeys) : 'a';
+}
+
+function genDrill(newKeys){
+  if(!newKeys || !newKeys.length) return '';
+  var toks=[];
+  newKeys.forEach(function(k){ toks.push(k+k+k); });
+  if(newKeys.length>1){
+    for(var i=0;i<5;i++){
+      var a=choice(newKeys), rest=newKeys.filter(function(x){return x!==a;});
+      var b=rest.length?choice(rest):a;
+      toks.push(a+b+a); toks.push(b+a+b);
+    }
+  } else {
+    for(var i=0;i<4;i++) toks.push(newKeys[0]+newKeys[0]+newKeys[0]);
+  }
+  return shuffle(toks).join(' ');
+}
+
+function genMixed(learnedKeys,newKeys,count){
+  var toks=[];
+  for(var i=0;i<count;i++){
+    var len=2+rnd(3);
+    var tok='';
+    for(var j=0;j<len;j++) tok+=weightedKey(newKeys,learnedKeys);
+    toks.push(tok);
+  }
+  return toks.join(' ');
+}
+
+function genWordsFromLetters(learnedKeys,targetChars,pool){
+  var set={}; learnedKeys.forEach(function(k){set[k]=true;});
+  var candidates=(pool||MASTER_WORDS).filter(function(w){
+    for(var i=0;i<w.length;i++){ if(!set[w[i]]) return false; }
+    return true;
+  });
+  if(candidates.length<3) return '';
+  candidates=shuffle(candidates);
+  var out=[], len=0, idx=0;
+  while(len<targetChars && idx<candidates.length*3){
+    var w=candidates[idx%candidates.length];
+    out.push(w); len+=w.length+1; idx++;
+  }
+  return out.join(' ');
+}
+
+function fitLength(text,min,max){
+  text=text.replace(/\s+/g,' ').trim();
+  if(text.length>max){
+    text=text.slice(0,max);
+    var lastSpace=text.lastIndexOf(' ');
+    if(lastSpace>min*0.6) text=text.slice(0,lastSpace);
+  }
+  return text;
+}
+
+function padToMin(text,min,filler){
+  while(text.length<min){ text += ' ' + filler(); }
+  return text;
+}
+
+function genBeginnerText(lesson,learnedKeys){
+  var newKeys=lesson.newKeys||[];
+  var parts=[];
+  var drill=genDrill(newKeys);
+  if(drill) parts.push(drill);
+  parts.push(genMixed(learnedKeys,newKeys,7));
+  var words=genWordsFromLetters(learnedKeys.length?learnedKeys:newKeys,90);
+  if(words) parts.push(words);
+  var text=parts.join(' ');
+  text=padToMin(text,150,function(){return genMixed(learnedKeys,newKeys,3);});
+  return fitLength(text,150,230);
+}
+
+function capitalize(w){ return w.charAt(0).toUpperCase()+w.slice(1); }
+
+var LEFT_LETTERS = {q:1,w:1,e:1,r:1,t:1,a:1,s:1,d:1,f:1,g:1,z:1,x:1,c:1,v:1,b:1};
+function handOfLetter(ch){ return LEFT_LETTERS[ch] ? 'L' : 'R'; }
+
+function genShiftText(mode,learnedAll){
+  // mode: 'left' -> capitals typed with LEFT shift (so letter is on the RIGHT hand)
+  //       'right' -> capitals typed with RIGHT shift (letter on LEFT hand)
+  //       'review' -> mixed
+  var pool=MASTER_WORDS.filter(function(w){return w.length>=3 && w.length<=8;});
+  var out=[]; var len=0;
+  var tries=0;
+  while(len<190 && tries<400){
+    tries++;
+    var w=choice(pool);
+    var hand=handOfLetter(w[0]);
+    var wantHand = mode==='left' ? 'R' : (mode==='right' ? 'L' : (Math.random()<0.5?'L':'R'));
+    if(mode!=='review' && hand!==wantHand) continue;
+    var cw=capitalize(w);
+    out.push(cw);
+    len+=cw.length+1;
+    if(out.length%6===0) out[out.length-1]+='.';
+  }
+  if(!out.length) out.push('Sample.');
+  return fitLength(out.join(' '),150,230);
+}
+
+var PUNCT_WORDS = MASTER_WORDS.filter(function(w){return w.length>=3 && w.length<=7;});
+function genPunctBasic(){
+  var out=[]; var len=0;
+  while(len<190){
+    var n=2+rnd(3);
+    var seg=[];
+    for(var i=0;i<n;i++) seg.push(choice(PUNCT_WORDS));
+    var end=choice(['.','.','.','?']);
+    var s=capitalize(seg.join(', '))+end;
+    out.push(s); len+=s.length+1;
+  }
+  return fitLength(out.join(' '),150,240);
+}
+function genPunctQuotes(){
+  var out=[]; var len=0;
+  while(len<190){
+    if(Math.random()<0.5){
+      var c=choice(CONTRACTIONS);
+      out.push(capitalize(c)+' '+choice(PUNCT_WORDS)+'.');
+    } else {
+      var w1=choice(PUNCT_WORDS), w2=choice(PUNCT_WORDS);
+      out.push('"'+capitalize(w1)+' '+w2+'," she said.');
+    }
+    len=out.join(' ').length;
+  }
+  return fitLength(out.join(' '),150,250);
+}
+function genPunctColon(){
+  var out=[]; var len=0;
+  var lead=['Remember this','Note the rule','Here is the plan','Consider this','Keep in mind'];
+  while(len<190){
+    if(Math.random()<0.5){
+      out.push(choice(lead)+': '+choice(PUNCT_WORDS)+' and '+choice(PUNCT_WORDS)+'.');
+    } else if(Math.random()<0.5) {
+      out.push(capitalize(choice(PUNCT_WORDS))+' is '+choice(['well-known','self-paced','up-to-date','two-fold','far-off'])+'; '+choice(PUNCT_WORDS)+' agrees.');
+    } else {
+      out.push(capitalize(choice(PUNCT_WORDS))+', '+choice(PUNCT_WORDS)+'; '+choice(PUNCT_WORDS)+'.');
+    }
+    len=out.join(' ').length;
+  }
+  return fitLength(out.join(' '),150,250);
+}
+function genPunctReview(){
+  var fns=[genPunctBasic,genPunctQuotes,genPunctColon];
+  return fitLength(choice(fns)()+' '+choice(fns)(),150,250);
+}
+
+function genNumberDigits(digits){
+  var toks=[];
+  for(var i=0;i<10;i++){
+    var len=1+rnd(4);
+    var t='';
+    for(var j=0;j<len;j++) t+=choice(digits);
+    toks.push(t);
+  }
+  return fitLength(toks.join(' '),150,220);
+}
+function genNumberSentences(){
+  var out=[]; var len=0;
+  var templates=[
+    function(){return 'I have '+ (1+rnd(99)) +' '+choice(PUNCT_WORDS)+'s and '+ (1+rnd(99)) +' '+choice(PUNCT_WORDS)+'s.';},
+    function(){return 'The score was '+ (1+rnd(999)) +' to '+ (1+rnd(999)) +'.';},
+    function(){return 'Room '+ (1+rnd(500)) +' is on floor '+ (1+rnd(20)) +'.';},
+    function(){return 'We waited '+ (1+rnd(60)) +' minutes for '+ (1+rnd(12)) +' guests.';}
+  ];
+  while(len<190){
+    var s=choice(templates)();
+    out.push(s); len+=s.length+1;
+  }
+  return fitLength(out.join(' '),150,240);
+}
+
+function genTop100(){
+  var out=[]; var len=0;
+  while(len<190){ var w=choice(TOP100); out.push(w); len+=w.length+1; }
+  return fitLength(out.join(' '),150,220);
+}
+function genLongWords(){
+  var out=[]; var len=0;
+  var pool=shuffle(LONG_WORDS);
+  var idx=0;
+  while(len<200){ var w=pool[idx%pool.length]; out.push(w); len+=w.length+1; idx++; }
+  return fitLength(out.join(' '),150,230);
+}
+
+function genSymbolTokens(symbols,styleFn,count){
+  var toks=[];
+  for(var i=0;i<count;i++) toks.push(styleFn(symbols));
+  return toks.join(' ');
+}
+function genSymbols15(){
+  var words=PUNCT_WORDS;
+  var makers=[
+    function(){return choice(words)+'@'+choice(words)+'.com';},
+    function(){return '#'+choice(words);},
+    function(){return '$'+(1+rnd(200))+'.'+(rnd(10))+(rnd(10));},
+    function(){return (1+rnd(100))+'% off';},
+    function(){return choice(words)+' & '+choice(words)+'!';},
+    function(){return '!!! '+capitalize(choice(words))+' !!!';}
+  ];
+  var out=[]; var len=0;
+  while(len<190){ var s=choice(makers)(); out.push(s); len+=s.length+1; }
+  return fitLength(out.join(' '),150,230);
+}
+function genSymbols60(){
+  var words=PUNCT_WORDS;
+  var makers=[
+    function(){return '('+choice(words)+')';},
+    function(){return choice(words)+' & '+choice(words);},
+    function(){return '*'+choice(words)+'*';},
+    function(){return (1+rnd(9))+'^'+(1+rnd(4));},
+    function(){return '*** '+capitalize(choice(words))+' ***';},
+    function(){return '(6&7) * (8&9)';}
+  ];
+  var out=[]; var len=0;
+  while(len<190){ var s=choice(makers)(); out.push(s); len+=s.length+1; }
+  return fitLength(out.join(' '),150,230);
+}
+function genBrackets(){
+  var words=PUNCT_WORDS;
+  var makers=[
+    function(){return '['+choice(words)+']';},
+    function(){return '{'+choice(words)+': '+(1+rnd(99))+'}';},
+    function(){return '<'+choice(words)+'>';},
+    function(){return 'array['+rnd(10)+']';},
+    function(){return '{'+choice(words)+', '+choice(words)+'}';},
+    function(){return '<'+choice(words)+'></'+choice(words)+'>';}
+  ];
+  var out=[]; var len=0;
+  while(len<190){ var s=choice(makers)(); out.push(s); len+=s.length+1; }
+  return fitLength(out.join(' '),150,230);
+}
+function genSlashes(){
+  var words=PUNCT_WORDS;
+  var makers=[
+    function(){return choice(words)+'/'+choice(words);},
+    function(){return choice(words)+'\\'+choice(words);},
+    function(){return choice(words)+'|'+choice(words);},
+    function(){return choice(words)+'_'+choice(words);},
+    function(){return choice(words)+' + '+choice(words)+' = '+choice(words);},
+    function(){return 'path/to/'+choice(words);},
+    function(){return '~'+choice(words);}
+  ];
+  var out=[]; var len=0;
+  while(len<190){ var s=choice(makers)(); out.push(s); len+=s.length+1; }
+  return fitLength(out.join(' '),150,230);
+}
+
+var PARA_THEMES = {
+  nature:["The forest wakes slowly as the first light finds the tallest branches.","A gentle wind moves through the tall grass near the quiet stream.","Small birds gather seeds before the clouds roll in from the west.","Moss grows thick on the north side of every old, patient stone.","Rain softens the trail and the air smells of pine and earth.","Deer often cross the meadow just before the light begins to fade.","A single leaf can ride the current for miles before it settles.","The valley holds the morning fog until the sun climbs higher."],
+  space:["The old telescope still finds the same bright stars every clear night.","A satellite crosses the sky slowly, faster than any airplane ever could.","Mars appears as a small, steady, reddish point above the eastern hills.","Astronauts train for years before they ever leave the launch pad.","The moon pulls the tides even when it cannot be seen at all.","Light from distant stars can take thousands of years to arrive.","A comet returns on a schedule that outlives every human generation.","Engineers test each rocket stage many times before a single launch."],
+  ocean:["Waves fold over the shore in a rhythm that never quite repeats.","A crab moves sideways across the sand, chased by the rising tide.","Deep water hides fish that never once see the light of day.","The lighthouse beam sweeps the harbor every few seconds through the fog.","Salt spray drifts over the rocks whenever a strong wind blows in.","Kelp forests sway gently in currents most sailors never notice.","A tide pool holds a small, busy world between two ordinary rocks.","Sailors once read the color of the sky to predict a storm."],
+  writing:["The first pencils were simply graphite wrapped in string or wood.","Printing presses once let a single page reach thousands of readers.","Early typewriters required a firm, steady press on every single key.","A well placed comma can quietly change the meaning of a sentence.","Letters were once the only way for two distant friends to speak.","Keyboards arrange letters the way they do for reasons over a century old.","A blank page can feel large until the very first word appears.","Good handwriting was once taught with the same care as arithmetic."]
+};
+function genParagraph(theme){
+  var pool=shuffle(PARA_THEMES[theme]);
+  var out=[]; var len=0; var idx=0;
+  while(len<300 && idx<pool.length){ out.push(pool[idx]); len+=pool[idx].length+1; idx++; }
+  return fitLength(out.join(' '),240,340);
+}
+var PARA_THEME_KEYS=Object.keys(PARA_THEMES);
+function genParagraphLesson(themeIdx){
+  return genParagraph(PARA_THEME_KEYS[themeIdx % PARA_THEME_KEYS.length]);
+}
+function genStamina(){
+  var themes=shuffle(PARA_THEME_KEYS).slice(0,3);
+  return themes.map(genParagraph).join('  ');
+}
+function genSpeedSprint(){
+  var out=[];
+  for(var i=0;i<60;i++) out.push(choice(TOP100.concat(MASTER_WORDS.slice(0,120))));
+  return out.join(' ');
+}
+
+/* ============================================================
+   LESSON DEFINITIONS
+   ============================================================ */
+function L(id,title,newKeys,kind,extra){
+  var o={id:id,title:title,newKeys:newKeys||[],kind:kind};
+  if(extra) for(var k in extra) o[k]=extra[k];
+  return o;
+}
+
+var LEVELS = {
+  beginner:{
+    label:'Beginner', target:12,
+    sections:[
+      {title:'Home Row', lessons:[
+        L('b1','J & F',['j','f'],'beginner'),
+        L('b2','D & K',['d','k'],'beginner'),
+        L('b3','S & L',['s','l'],'beginner'),
+        L('b4','A & ;',['a',';'],'beginner'),
+        L('b5','G & H',['g','h'],'beginner'),
+        L('b6','Home Row Review',[],'beginner')
+      ]},
+      {title:'Top Row', lessons:[
+        L('b7','E & I',['e','i'],'beginner'),
+        L('b8','R & U',['r','u'],'beginner'),
+        L('b9','T & O',['t','o'],'beginner'),
+        L('b10','W & Y',['w','y'],'beginner'),
+        L('b11','Q & P',['q','p'],'beginner'),
+        L('b12','Top Row Review',[],'beginner')
+      ]},
+      {title:'Bottom Row', lessons:[
+        L('b13','C & ,',['c',','],'beginner'),
+        L('b14','V & M',['v','m'],'beginner'),
+        L('b15','N & B',['n','b'],'beginner'),
+        L('b16','X & .',['x','.'],'beginner'),
+        L('b17','Z & /',['z','/'],'beginner'),
+        L('b18','All Letters Review',[],'beginner')
+      ]}
+    ]
+  },
+  intermediate:{
+    label:'Intermediate', target:22,
+    sections:[
+      {title:'Capital Letters', lessons:[
+        L('i1','Left Shift',[],'shift-left'),
+        L('i2','Right Shift',[],'shift-right'),
+        L('i3','Capitals Review',[],'shift-review')
+      ]},
+      {title:'Punctuation', lessons:[
+        L('i4','Period, Comma & Question Mark',['.',',','?'],'punct-basic'),
+        L('i5','Apostrophes & Quotes',["'",'"'],'punct-quotes'),
+        L('i6','Colon, Semicolon & Hyphen',[':',';','-'],'punct-colon'),
+        L('i7','Punctuation Review',[],'punct-review')
+      ]},
+      {title:'Numbers', lessons:[
+        L('i8','1 to 5',['1','2','3','4','5'],'numbers-15'),
+        L('i9','6 to 0',['6','7','8','9','0'],'numbers-60'),
+        L('i10','Numbers in Sentences',[],'numbers-sentences')
+      ]},
+      {title:'Word Practice', lessons:[
+        L('i11','Top 100 Common Words',[],'top100'),
+        L('i12','Longer Words',[],'longwords')
+      ]}
+    ]
+  },
+  advanced:{
+    label:'Advanced', target:32,
+    sections:[
+      {title:'Symbols', lessons:[
+        L('a1','Symbols on 1–5',['!','@','#','$','%'],'symbols-15'),
+        L('a2','Symbols on 6–0',['^','&','*','(',')'],'symbols-60'),
+        L('a3','Brackets & Braces',['[',']','{','}','<','>'],'brackets'),
+        L('a4','Slashes & Signs',['/','\\','|','+','=','-','_','~'],'slashes')
+      ]},
+      {title:'Paragraphs', lessons:[
+        L('a5','Paragraph: Nature',[],'paragraph',{theme:0}),
+        L('a6','Paragraph: Space',[],'paragraph',{theme:1}),
+        L('a7','Paragraph: Ocean',[],'paragraph',{theme:2}),
+        L('a8','Paragraph: Writing',[],'paragraph',{theme:3})
+      ]},
+      {title:'Speed & Stamina', lessons:[
+        L('a9','Speed Sprint',[],'speedsprint'),
+        L('a10','Stamina Run',[],'stamina')
+      ]}
+    ]
+  }
+};
+
+// compute cumulative learned keys for beginner lessons + flat order
+var FLAT_LESSONS = [];
+var LEARNED_AT = {};
+(function(){
+  var order=['beginner','intermediate','advanced'];
+  var acc=[];
+  order.forEach(function(levelKey){
+    LEVELS[levelKey].sections.forEach(function(sec){
+      sec.lessons.forEach(function(les){
+        les.level=levelKey;
+        if(levelKey==='beginner'){
+          les.newKeys.forEach(function(k){ if(acc.indexOf(k)===-1) acc.push(k); });
+          LEARNED_AT[les.id]=acc.slice();
+        }
+        FLAT_LESSONS.push(les);
+      });
+    });
+  });
+})();
+var LESSON_BY_ID={};
+FLAT_LESSONS.forEach(function(l){ LESSON_BY_ID[l.id]=l; });
+
+function generateText(lesson){
+  switch(lesson.kind){
+    case 'beginner': return genBeginnerText(lesson, LEARNED_AT[lesson.id]||[]);
+    case 'shift-left': return genShiftText('left');
+    case 'shift-right': return genShiftText('right');
+    case 'shift-review': return genShiftText('review');
+    case 'punct-basic': return genPunctBasic();
+    case 'punct-quotes': return genPunctQuotes();
+    case 'punct-colon': return genPunctColon();
+    case 'punct-review': return genPunctReview();
+    case 'numbers-15': return genNumberDigits(['1','2','3','4','5']);
+    case 'numbers-60': return genNumberDigits(['6','7','8','9','0']);
+    case 'numbers-sentences': return genNumberSentences();
+    case 'top100': return genTop100();
+    case 'longwords': return genLongWords();
+    case 'symbols-15': return genSymbols15();
+    case 'symbols-60': return genSymbols60();
+    case 'brackets': return genBrackets();
+    case 'slashes': return genSlashes();
+    case 'paragraph': return genParagraphLesson(lesson.theme||0);
+    case 'speedsprint': return genSpeedSprint();
+    case 'stamina': return genStamina();
+    default: return genBeginnerText(lesson,[]);
+  }
+}
+
+/* ============================================================
+   PROGRESS / STORAGE
+   ============================================================ */
+var STORAGE_KEY='typetrail_progress_v1';
+var progress={lessons:{}, lastLevel:'beginner'};
+function loadProgress(){
+  try{
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){ var parsed=JSON.parse(raw); if(parsed && typeof parsed==='object'){ progress=parsed; if(!progress.lessons) progress.lessons={}; } }
+  }catch(e){}
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+loadProgress();
+
+function recordResult(lessonId,stars,wpm){
+  var cur=progress.lessons[lessonId]||{stars:0,wpm:0};
+  progress.lessons[lessonId]={ stars:Math.max(cur.stars,stars), wpm:Math.max(cur.wpm,Math.round(wpm)) };
+  saveProgress();
+}
+function overallStats(){
+  var completed=0, bestWpm=0, totalStars=0;
+  Object.keys(progress.lessons).forEach(function(id){
+    var p=progress.lessons[id];
+    if(p.stars>0) completed++;
+    if(p.wpm>bestWpm) bestWpm=p.wpm;
+    totalStars+=p.stars;
+  });
+  return {completed:completed, bestWpm:bestWpm, totalStars:totalStars};
+}
+function nextUnfinishedLesson(){
+  for(var i=0;i<FLAT_LESSONS.length;i++){
+    var l=FLAT_LESSONS[i];
+    var p=progress.lessons[l.id];
+    if(!p || !p.stars) return l;
+  }
+  return FLAT_LESSONS[FLAT_LESSONS.length-1];
+}
+
+/* ============================================================
+   KEYBOARD LAYOUT DATA
+   ============================================================ */
+var FINGER_LABEL={LP:'left pinky',LR:'left ring finger',LM:'left middle finger',LI:'left index finger',
+  RI:'right index finger',RM:'right middle finger',RR:'right ring finger',RP:'right pinky',thumb:'thumbs'};
+var FINGER_VAR={LP:'--f-lp',LR:'--f-lr',LM:'--f-lm',LI:'--f-li',RI:'--f-ri',RM:'--f-rm',RR:'--f-rr',RP:'--f-rp',thumb:'--f-thumb'};
+var LEFT_FINGERS={LP:1,LR:1,LM:1,LI:1};
+
+var KB_ROWS=[
+ [ {k:'`',s:'~',finger:'LP'}, {k:'1',s:'!',finger:'LP'}, {k:'2',s:'@',finger:'LR'}, {k:'3',s:'#',finger:'LM'}, {k:'4',s:'$',finger:'LI'}, {k:'5',s:'%',finger:'LI'}, {k:'6',s:'^',finger:'RI'}, {k:'7',s:'&',finger:'RI'}, {k:'8',s:'*',finger:'RM'}, {k:'9',s:'(',finger:'RR'}, {k:'0',s:')',finger:'RP'}, {k:'-',s:'_',finger:'RP'}, {k:'=',s:'+',finger:'RP'}, {special:true,label:'⌫',finger:'RP',w:2,id:'Backspace'} ],
+ [ {special:true,label:'Tab',finger:'LP',w:1.5,id:'Tab'}, {k:'q',s:'Q',finger:'LP'}, {k:'w',s:'W',finger:'LR'}, {k:'e',s:'E',finger:'LM'}, {k:'r',s:'R',finger:'LI'}, {k:'t',s:'T',finger:'LI'}, {k:'y',s:'Y',finger:'RI'}, {k:'u',s:'U',finger:'RI'}, {k:'i',s:'I',finger:'RM'}, {k:'o',s:'O',finger:'RR'}, {k:'p',s:'P',finger:'RP'}, {k:'[',s:'{',finger:'RP'}, {k:']',s:'}',finger:'RP'}, {k:'\\',s:'|',finger:'RP',w:1.5} ],
+ [ {special:true,label:'Caps',finger:'LP',w:1.75,id:'CapsLock'}, {k:'a',s:'A',finger:'LP'}, {k:'s',s:'S',finger:'LR'}, {k:'d',s:'D',finger:'LM'}, {k:'f',s:'F',finger:'LI',bump:true}, {k:'g',s:'G',finger:'LI'}, {k:'h',s:'H',finger:'RI'}, {k:'j',s:'J',finger:'RI',bump:true}, {k:'k',s:'K',finger:'RM'}, {k:'l',s:'L',finger:'RR'}, {k:';',s:':',finger:'RP'}, {k:"'",s:'"',finger:'RP'}, {special:true,label:'Enter',finger:'RP',w:2.25,id:'Enter'} ],
+ [ {special:true,label:'Shift',finger:'LP',w:2.25,id:'ShiftLeft'}, {k:'z',s:'Z',finger:'LP'}, {k:'x',s:'X',finger:'LR'}, {k:'c',s:'C',finger:'LM'}, {k:'v',s:'V',finger:'LI'}, {k:'b',s:'B',finger:'LI'}, {k:'n',s:'N',finger:'RI'}, {k:'m',s:'M',finger:'RI'}, {k:',',s:'<',finger:'RM'}, {k:'.',s:'>',finger:'RR'}, {k:'/',s:'?',finger:'RP'}, {special:true,label:'Shift',finger:'RP',w:2.75,id:'ShiftRight'} ],
+ [ {special:true,label:'Space',finger:'thumb',id:'Space',isSpace:true} ]
+];
+
+var CHAR_TO_KEY={}; // char -> {row,col,shift}
+KB_ROWS.forEach(function(row,ri){
+  row.forEach(function(key,ci){
+    if(key.special) return;
+    CHAR_TO_KEY[key.k]={row:ri,col:ci,shift:false};
+    CHAR_TO_KEY[key.s]={row:ri,col:ci,shift:true};
+  });
+});
+CHAR_TO_KEY[' ']={row:4,col:0,shift:false,isSpace:true};
+
+/* ============================================================
+   RENDER: LESSONS SCREEN
+   ============================================================ */
+var screenLessons=document.getElementById('screen-lessons');
+var screenTyping=document.getElementById('screen-typing');
+var screenResults=document.getElementById('screen-results');
+function showScreen(name){
+  [screenLessons,screenTyping,screenResults].forEach(function(s){ s.classList.remove('active'); });
+  if(name==='lessons') screenLessons.classList.add('active');
+  if(name==='typing') screenTyping.classList.add('active');
+  if(name==='results') screenResults.classList.add('active');
+}
+
+var currentLevel=progress.lastLevel||'beginner';
+
+function renderTabs(){
+  var host=document.getElementById('level-tabs');
+  host.innerHTML='';
+  ['beginner','intermediate','advanced'].forEach(function(key){
+    var b=document.createElement('button');
+    b.className='level-tab'+(key===currentLevel?' active':'');
+    b.textContent=LEVELS[key].label;
+    b.addEventListener('click',function(){ currentLevel=key; progress.lastLevel=key; saveProgress(); renderTabs(); renderSections(); });
+    host.appendChild(b);
+  });
+}
+
+function starsHtml(count,filledClass){
+  var s='';
+  for(var i=1;i<=3;i++){ s+='<span class="star'+(i<=count?' filled':'')+'">★</span>'; }
+  return s;
+}
+
+function renderSections(){
+  var host=document.getElementById('sections-host');
+  host.innerHTML='';
+  LEVELS[currentLevel].sections.forEach(function(sec){
+    var block=document.createElement('div');
+    block.className='section-block';
+    var h=document.createElement('div');
+    h.className='section-title';
+    h.textContent=sec.title;
+    block.appendChild(h);
+    var grid=document.createElement('div');
+    grid.className='lesson-grid';
+    sec.lessons.forEach(function(les,i){
+      var p=progress.lessons[les.id]||{stars:0,wpm:0};
+      var card=document.createElement('button');
+      card.className='lesson-card';
+      var keysHtml = les.newKeys.length ? '<div class="lesson-keys">'+les.newKeys.map(function(k){return '<span class="keycap-mini">'+escapeHtml(k===' '?'Space':k)+'</span>';}).join('')+'</div>' : '';
+      card.innerHTML =
+        '<div class="lesson-num">Lesson '+(FLAT_LESSONS.indexOf(les)+1)+'</div>'+
+        '<div class="lesson-title">'+escapeHtml(les.title)+'</div>'+
+        keysHtml+
+        '<div class="lesson-foot"><span class="stars-mini">'+starsHtml(p.stars)+'</span><span class="wpm-mini">'+(p.wpm?p.wpm+' wpm':'—')+'</span></div>';
+      card.addEventListener('click',function(){ startLesson(les.id); });
+      grid.appendChild(card);
+    });
+    block.appendChild(grid);
+    host.appendChild(block);
+  });
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function renderStatsRow(){
+  var st=overallStats();
+  document.getElementById('stat-completed').textContent=st.completed;
+  document.getElementById('stat-wpm').textContent=st.bestWpm;
+  document.getElementById('stat-stars').textContent=st.totalStars;
+}
+
+function renderContinueCard(){
+  var les=nextUnfinishedLesson();
+  document.getElementById('continue-title').textContent=les.title;
+  document.getElementById('continue-sub').textContent=LEVELS[les.level].label+' · '+(FLAT_LESSONS.indexOf(les)+1)+' of '+FLAT_LESSONS.length;
+  document.getElementById('continue-card').onclick=function(){ startLesson(les.id); };
+}
+
+function renderLessonsScreen(){
+  renderStatsRow();
+  renderContinueCard();
+  renderTabs();
+  renderSections();
+}
+
+document.getElementById('reset-btn').addEventListener('click',function(){
+  if(confirm('Reset all progress? This clears every star and best WPM.')){
+    progress={lessons:{}, lastLevel:currentLevel};
+    saveProgress();
+    renderLessonsScreen();
+  }
+});
+
+/* ============================================================
+   TYPING ENGINE
+   ============================================================ */
+var ts={ lesson:null, text:'', pos:0, startTime:null, timerId:null, totalKeystrokes:0, correctKeystrokes:0, missed:{}, finished:false, wrongActive:false };
+
+function startLesson(lessonId){
+  var lesson=LESSON_BY_ID[lessonId];
+  ts.lesson=lesson;
+  ts.text=generateText(lesson);
+  ts.pos=0; ts.startTime=null; ts.totalKeystrokes=0; ts.correctKeystrokes=0; ts.missed={}; ts.finished=false; ts.wrongActive=false;
+  if(ts.timerId){ clearInterval(ts.timerId); ts.timerId=null; }
+  document.getElementById('type-title').textContent=lesson.title;
+  document.getElementById('live-wpm').textContent='0';
+  document.getElementById('live-acc').textContent='100%';
+  document.getElementById('live-time').textContent='0:00';
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('ready-overlay').style.display='flex';
+  renderTextInner();
+  updateCursorAndScroll(true);
+  updateHintAndKeyboard();
+  showScreen('typing');
+  var mi=document.getElementById('mobile-input');
+  mi.value='';
+  setTimeout(function(){ mi.focus(); },50);
+}
+
+function renderTextInner(){
+  var inner=document.getElementById('text-inner');
+  var html='';
+  for(var i=0;i<ts.text.length;i++){
+    var ch=ts.text[i];
+    var display = ch===' ' ? ' ' : escapeHtml(ch);
+    html+='<span class="ch" data-i="'+i+'">'+display+'</span>';
+  }
+  inner.innerHTML=html;
+}
+
+var charSpans=null;
+function getSpans(){
+  if(!charSpans) charSpans=document.getElementById('text-inner').querySelectorAll('.ch');
+  return charSpans;
+}
+
+function updateClasses(){
+  var spans=getSpans();
+  for(var i=0;i<spans.length;i++){
+    var cls='ch';
+    if(i<ts.pos) cls+=' correct';
+    else if(i===ts.pos){ cls+=' cursor'; if(ts.text[i]===' ') cls+=' space-cur'; if(ts.wrongActive) cls+=' wrong'; }
+    spans[i].className=cls;
+  }
+}
+
+function updateCursorAndScroll(immediate){
+  updateClasses();
+  var spans=getSpans();
+  var idx=Math.min(ts.pos,spans.length-1);
+  if(!spans.length) return;
+  var scrollEl=document.querySelector('.text-scroll');
+  var inner=document.getElementById('text-inner');
+  var lineHeight=parseFloat(getComputedStyle(inner).lineHeight);
+  var target=spans[idx];
+  var offsetTop=target.offsetTop;
+  var line=Math.round(offsetTop/lineHeight);
+  var shiftLines=Math.max(0,line-1);
+  inner.style.transition=immediate?'none':'transform .18s ease';
+  inner.style.transform='translateY(-'+(shiftLines*lineHeight)+'px)';
+  if(immediate){ void inner.offsetHeight; inner.style.transition='transform .18s ease'; }
+  var progressPct=Math.min(100,Math.round((ts.pos/ts.text.length)*100));
+  document.getElementById('progress-fill').style.width=progressPct+'%';
+}
+
+function updateHintAndKeyboard(){
+  clearKeyHighlights();
+  if(ts.pos>=ts.text.length){ document.getElementById('hint-line').innerHTML='&nbsp;'; return; }
+  var ch=ts.text[ts.pos];
+  var info = CHAR_TO_KEY[ch] || CHAR_TO_KEY[ch.toLowerCase()];
+  if(!info){ document.getElementById('hint-line').innerHTML='&nbsp;'; return; }
+  var needsShift = info.shift || (ch>='A'&&ch<='Z');
+  var keyDef=KB_ROWS[info.row][info.col];
+  var keyEl=keyEls[info.row][info.col];
+  keyEl.classList.add('next-key');
+  var fingerLabel=FINGER_LABEL[keyDef.finger];
+  var displayKey = keyDef.isSpace ? 'Space' : (needsShift ? keyDef.s : keyDef.k);
+  var hint='';
+  if(needsShift && !keyDef.isSpace){
+    var shiftIsLeft = LEFT_FINGERS[keyDef.finger] ? false : true; // if letter on right hand, shift is LEFT; if letter on left hand, shift is RIGHT
+    var shiftFinger = shiftIsLeft ? 'LP' : 'RP';
+    var shiftRow=3, shiftCol= shiftIsLeft?0:11;
+    keyEls[shiftRow][shiftCol].classList.add('next-shift');
+    hint='Hold '+(shiftIsLeft?'Left':'Right')+' Shift and press <b>'+escapeHtml(displayKey)+'</b> with your '+fingerLabel;
+  } else if(keyDef.isSpace){
+    hint='Press <b>Space</b> with your thumbs';
+  } else {
+    hint='Press <b>'+escapeHtml(displayKey)+'</b> with your '+fingerLabel;
+  }
+  document.getElementById('hint-line').innerHTML=hint;
+}
+
+function clearKeyHighlights(){
+  keyEls.forEach(function(row){ row.forEach(function(el){ if(el) el.classList.remove('next-key','next-shift'); }); });
+}
+
+function flashKeyPressed(ch,wrong){
+  var info=CHAR_TO_KEY[ch]||CHAR_TO_KEY[(ch||'').toLowerCase()];
+  if(!info) return;
+  var el=keyEls[info.row][info.col];
+  if(!el) return;
+  el.classList.add(wrong?'wrong-flash':'pressed');
+  setTimeout(function(){ el.classList.remove(wrong?'wrong-flash':'pressed'); }, wrong?260:120);
+}
+
+function startTimerIfNeeded(){
+  if(ts.startTime) return;
+  ts.startTime=Date.now();
+  ts.timerId=setInterval(tick,250);
+}
+
+function elapsedSeconds(){ return ts.startTime ? (Date.now()-ts.startTime)/1000 : 0; }
+
+function tick(){
+  var secs=elapsedSeconds();
+  var mins=secs/60;
+  var wpm = mins>0 ? Math.round((ts.correctKeystrokes/5)/mins) : 0;
+  var acc = ts.totalKeystrokes>0 ? Math.round((ts.correctKeystrokes/ts.totalKeystrokes)*100) : 100;
+  document.getElementById('live-wpm').textContent=wpm;
+  document.getElementById('live-acc').textContent=acc+'%';
+  var m=Math.floor(secs/60), s=Math.floor(secs%60);
+  document.getElementById('live-time').textContent=m+':'+(s<10?'0':'')+s;
+}
+
+function handleChar(ch){
+  if(ts.finished) return;
+  if(ch==null || ch.length!==1) return;
+  document.getElementById('ready-overlay').style.display='none';
+  startTimerIfNeeded();
+  var expected=ts.text[ts.pos];
+  ts.totalKeystrokes++;
+  if(ch===expected){
+    ts.correctKeystrokes++;
+    ts.wrongActive=false;
+    ts.pos++;
+    flashKeyPressed(ch,false);
+    if(ts.pos>=ts.text.length){ finishLesson(); return; }
+    updateCursorAndScroll(false);
+    updateHintAndKeyboard();
+    tick();
+  } else {
+    ts.missed[expected]=(ts.missed[expected]||0)+1;
+    ts.wrongActive=true;
+    flashKeyPressed(ch,true);
+    updateClasses();
+    var spans=getSpans();
+    var cur=spans[ts.pos];
+    cur.classList.add('shake');
+    setTimeout(function(){ cur.classList.remove('shake'); },280);
+    tick();
+  }
+}
+
+function finishLesson(){
+  ts.finished=true;
+  if(ts.timerId){ clearInterval(ts.timerId); ts.timerId=null; }
+  clearKeyHighlights();
+  document.getElementById('hint-line').innerHTML='&nbsp;';
+  var secs=Math.max(elapsedSeconds(),0.5);
+  var mins=secs/60;
+  var wpm=(ts.correctKeystrokes/5)/mins;
+  var acc = ts.totalKeystrokes>0 ? (ts.correctKeystrokes/ts.totalKeystrokes)*100 : 100;
+  var target=LEVELS[ts.lesson.level].target;
+  var stars=1;
+  if(acc>=96 && wpm>=target) stars=3;
+  else if(acc>=90 && wpm>=target*0.6) stars=2;
+  recordResult(ts.lesson.id,stars,wpm);
+  showResults(stars,wpm,acc,secs);
+}
+
+function showResults(stars,wpm,acc,secs){
+  var starsHost=document.getElementById('results-stars');
+  starsHost.innerHTML='';
+  for(var i=1;i<=3;i++){
+    var sp=document.createElement('span');
+    sp.className='star'+(i<=stars?' filled':'');
+    sp.textContent='★';
+    starsHost.appendChild(sp);
+  }
+  document.getElementById('results-title').textContent = stars===3?'Excellent work!':(stars===2?'Nice job!':'Lesson complete!');
+  document.getElementById('res-wpm').textContent=Math.round(wpm);
+  document.getElementById('res-acc').textContent=Math.round(acc)+'%';
+  var m=Math.floor(secs/60), s=Math.floor(secs%60);
+  document.getElementById('res-time').textContent=m+':'+(s<10?'0':'')+s;
+  var missedArr=Object.keys(ts.missed).map(function(k){return {ch:k,count:ts.missed[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,3);
+  var missedHost=document.getElementById('missed-keys');
+  var missedRow=document.getElementById('missed-row');
+  if(missedArr.length){
+    missedRow.style.display='block';
+    missedHost.innerHTML=missedArr.map(function(m){return '<span class="keycap-mini">'+escapeHtml(m.ch===' '?'Space':m.ch)+'</span>';}).join('');
+  } else {
+    missedRow.style.display='none';
+  }
+  showScreen('results');
+}
+
+/* ============================================================
+   KEYBOARD RENDER
+   ============================================================ */
+var keyEls=[];
+function renderKeyboard(){
+  var rowsHost=document.getElementById('kb-rows');
+  rowsHost.innerHTML='';
+  keyEls=[];
+  KB_ROWS.forEach(function(row,ri){
+    var rowEl=document.createElement('div');
+    rowEl.className='kb-row';
+    var rowKeyEls=[];
+    row.forEach(function(key){
+      var el=document.createElement('div');
+      el.className='key'+(key.special?' special':'')+(key.isSpace?' key-space':'');
+      el.style.setProperty('--tint','var('+FINGER_VAR[key.finger]+')');
+      if(key.w) el.style.flex=key.w+' '+key.w+' 0';
+      if(!key.special) el.textContent=key.k;
+      else if(!key.isSpace) el.textContent=key.label;
+      if(key.bump){ var b=document.createElement('div'); b.className='bump'; el.appendChild(b); }
+      rowEl.appendChild(el);
+      rowKeyEls.push(el);
+    });
+    keyEls.push(rowKeyEls);
+    rowsHost.appendChild(rowEl);
+  });
+}
+
+function renderLegend(){
+  var host=document.getElementById('kb-legend');
+  var order=['LP','LR','LM','LI','RI','RM','RR','RP','thumb'];
+  host.innerHTML=order.map(function(f){
+    return '<span class="legend-item"><span class="legend-swatch" style="background:var('+FINGER_VAR[f]+')"></span>'+FINGER_LABEL[f]+'</span>';
+  }).join('');
+}
+
+/* ============================================================
+   INPUT HANDLING
+   ============================================================ */
+var mobileInput=document.getElementById('mobile-input');
+
+window.addEventListener('keydown',function(e){
+  if(!screenTyping.classList.contains('active')) return;
+  if(e.key==='Escape'){ e.preventDefault(); startLesson(ts.lesson.id); return; }
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.key==='Backspace'){ e.preventDefault(); return; }
+  if(e.key===' ' || e.code==='Space'){ e.preventDefault(); handleChar(' '); return; }
+  if(e.key==='Tab'){ e.preventDefault(); return; }
+  if(e.key && e.key.length===1){
+    e.preventDefault();
+    handleChar(e.key);
+    return;
+  }
+  // Unidentified / mobile: let it flow to hidden input
+});
+
+mobileInput.addEventListener('input',function(){
+  var v=mobileInput.value;
+  if(v.length){
+    var ch=v[v.length-1];
+    handleChar(ch);
+  }
+  mobileInput.value='';
+});
+
+document.getElementById('back-btn').addEventListener('click',function(){
+  if(ts.timerId){ clearInterval(ts.timerId); ts.timerId=null; }
+  showScreen('lessons');
+  renderLessonsScreen();
+});
+
+document.getElementById('kb-toggle').addEventListener('click',function(){
+  var wrap=document.getElementById('keyboard-wrap');
+  var hidden=wrap.style.display==='none';
+  wrap.style.display=hidden?'':'none';
+  this.textContent=hidden?'Hide keyboard':'Show keyboard';
+});
+
+document.getElementById('btn-retry').addEventListener('click',function(){ startLesson(ts.lesson.id); });
+document.getElementById('btn-next').addEventListener('click',goNextLesson);
+document.getElementById('btn-alllessons').addEventListener('click',function(){ showScreen('lessons'); renderLessonsScreen(); });
+
+function goNextLesson(){
+  var idx=FLAT_LESSONS.indexOf(ts.lesson);
+  var next=FLAT_LESSONS[Math.min(idx+1,FLAT_LESSONS.length-1)];
+  startLesson(next.id);
+}
+
+document.addEventListener('keydown',function(e){
+  if(screenResults.classList.contains('active') && e.key==='Enter'){
+    e.preventDefault();
+    goNextLesson();
+  }
+});
+
+window.addEventListener('resize',function(){
+  if(screenTyping.classList.contains('active') && charSpans) updateCursorAndScroll(true);
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+charSpans=null;
+renderKeyboard();
+renderLegend();
+renderLessonsScreen();
+
+})();
+</script>
+</body>
+</html>
